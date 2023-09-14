@@ -1,48 +1,61 @@
 import random
-from team import Team
+from objects.team import Team
 
 class Fixture:
-    def __init__(self, id:str, home_team:Team = None, away_team:Team = None, leg:int = 0, agg_score:str = None, score:str = None, outcome:str = None) -> None:
-        self.id = id # same fixture can be played twice (legs), how to deal wuth that?
-        self.home_team = home_team
-        self.away_team = away_team
-        self.leg = leg
-        self.agg_score = agg_score # needs to be lamda func combining scores from the 2 legs played
-        self.score = score # parse str to get home & away team goals. home goals always comes first i.e. 5-3, home team score = 5, away = 3
-        self.outcome = outcome # win, loss or draw relative to home team - work with score parsing
+    def __init__(self, team1: Team = None, team2: Team = None, scores: [] = []) -> None:
+        self.team1 = team1
+        self.team2 = team2
+        self.leg = 1 # implement as a counter
+        self.agg_score = []
+        # store leg scores in array
+        self.scores = scores  # store scores as tuples, sum later for agg_score
+        self.result = None
     
-    def play_fixture(self) -> str:
-        # randomize score from 1-10 with weights for each team
-        score_list = [0] * 6 + [1] * 6 + [2] * 6 + [3] * 6 + [4] * 6 + [5] * 2 + [6] * 2 + [7] * 1 + [8] * 1 + [9] * 1 + [10] * 1
-        
-        home_score = random.choice(score_list) 
-        away_score = random.choice(score_list)
-        
-        # update team attrs
-        self.home_team.goals_for = self.home_team.goals_for + home_score
-        self.home_team.goals_against = self.home_team.goals_against + away_score
-        
-        self.away_team.goals_for = self.away_team.goals_for + away_score
-        self.away_team.goals_against = self.away_team.goals_against + home_score
-        
-        # fixture outcome relative to home team
-        self.score = str(home_score) + "-" + str(away_score)
-        
-        if home_score == away_score:
-            self.outcome = "Draw"
-            self.home_team.drawn_game()
-            self.away_team.drawn_game()
-            
-        if home_score > away_score:
-            self.outcome = "Win"
-            self.home_team.won_game()
-            self.away_team.lost_game()
-            
-        if home_score < away_score:
-            self.outcome = "Loss"
-            self.home_team.lost_game()
-            self.away_team.won_game()
+    def play_fixture(self) -> str:        
+        if self.leg > 2 or len(self.scores) >= 2:
+            raise Exception("Error: There cannot be more than 2 legs per fixture")
 
-'''
-2 legs ????
-'''
+        # randomize score from 0-10 with weights for each result
+        score_list = [0] * 20 + [1] * 20 + [2] * 20 + [3] * 20 + [4] * 20 + [5] * 3 + [6] * 3 + [7] * 1 + [8] * 1 + [9] * 1 + [10] * 1
+
+        team1_score = random.choice(score_list)
+        team2_score = random.choice(score_list)
+
+        # update team attrs
+        self.team1.goals_for += team1_score
+        self.team1.goals_against += team2_score
+
+        self.team2.goals_for += team2_score
+        self.team2.goals_against += team1_score
+        
+        if team1_score == team2_score:
+            self.team1.drawn_game()
+            self.team2.drawn_game()
+
+        if team1_score > team2_score:
+            self.team1.won_game()
+            self.team2.lost_game()
+
+        if team1_score < team2_score:
+            self.team1.lost_game()
+            self.team2.won_game()
+        
+        # store scores in list
+        self.scores.append((team1_score, team2_score))
+
+        # fixture outcome relative to home team
+        self.result = str(team1_score) + "-" + str(team2_score)
+        
+        # compute aggr score
+        t1_total = 0
+        t2_total = 0
+        for result in self.scores:
+            t1_total += result[0]
+            t2_total += result[1]
+        
+        self.agg_score = str(t1_total) + '-' + str(t2_total)
+        
+        self.leg += 1
+
+        return self.result
+    
