@@ -2,14 +2,25 @@ import random
 from objects.team import Team
 
 class Fixture:
-    def __init__(self, team1: Team = None, team2: Team = None, scores: [] = []) -> None:
+    def __init__(self, team1: Team, team2: Team, leg: int = 1, agg_score: tuple = (), scores: list = []) -> None:
         self.team1 = team1
         self.team2 = team2
-        self.leg = 1 # implement as a counter
-        self.agg_score = []
+        self.leg = leg # implement as a counter
+        self.agg_score = agg_score
         # store leg scores in array
         self.scores = scores  # store scores as tuples, sum later for agg_score
         self.result = None
+        
+        if not isinstance(team1, Team) and not isinstance(team2, Team):
+            raise TypeError("team attribute must be of type " + str(Team))
+        if not isinstance(leg, int):
+            raise TypeError("leg attribute must be of type int")
+        if not isinstance(agg_score, tuple):
+            raise TypeError("aggregate score attribute must be of type tuple")
+        if not isinstance(scores, list):
+            raise TypeError("scores attribute must be of type list")
+        if leg < 1:
+            raise Exception("Cannot have a fixture with less than one leg")
     
     def play_fixture(self) -> str:        
         if self.leg > 2 or len(self.scores) >= 2:
@@ -20,8 +31,24 @@ class Fixture:
 
         team1_score = random.choice(score_list)
         team2_score = random.choice(score_list)
+        
+        # store scores in list
+        self.scores.append((team1_score, team2_score))
 
+        # fixture outcome relative to home team
+        self.result = str(team1_score) + "-" + str(team2_score)
+        
         # update team attrs
+        self.update_team_attrs(team1_score, team2_score)
+        
+        # compute aggr score
+        self.compute_agg_score()
+        
+        self.leg += 1 
+
+        return self.result
+    
+    def update_team_attrs(self, team1_score: int, team2_score: int) -> None:
         self.team1.goals_for += team1_score
         self.team1.goals_against += team2_score
 
@@ -39,23 +66,12 @@ class Fixture:
         if team1_score < team2_score:
             self.team1.lost_game()
             self.team2.won_game()
-        
-        # store scores in list
-        self.scores.append((team1_score, team2_score))
-
-        # fixture outcome relative to home team
-        self.result = str(team1_score) + "-" + str(team2_score)
-        
-        # compute aggr score
+    
+    def compute_agg_score(self) -> None:
         t1_total = 0
         t2_total = 0
         for result in self.scores:
             t1_total += result[0]
             t2_total += result[1]
         
-        self.agg_score = str(t1_total) + '-' + str(t2_total)
-        
-        self.leg += 1
-
-        return self.result
-    
+        self.agg_score = (t1_total, t2_total)
