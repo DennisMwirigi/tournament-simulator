@@ -77,15 +77,15 @@ def test_init_invalid_param_types():
     assert str(t_err7.value) == "All team attributes other than name must be of type int"
 
 def test_init_valid_params():
-    team = Team("united", 3, 5, 6, 1, 1, 1)
+    team = Team("united", 3, 1, 1, 1, 5, 6)
     assert team.name == "united"
     assert team.games_played == 3
+    assert team.games_won == 1
+    assert team.games_drawn == 1
+    assert team.games_lost == 1
     assert team.goals_for == 5
     assert team.goals_against == 6
     assert team.goal_difference() == -1
-    assert team.games_won == 1
-    assert team.games_lost == 1
-    assert team.games_drawn == 1
     assert team.total_points() == 4
 
 def test_won_game():

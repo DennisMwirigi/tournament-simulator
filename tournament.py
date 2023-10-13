@@ -1,5 +1,6 @@
 from objects.team import Team
 from objects.fixture import Fixture
+from objects.group import Group
 
 def main():
     team1 = Team('united')
@@ -32,7 +33,20 @@ def main():
     
     team3 = Team('arsenal', 0, 0, 0, 0, -1, 0)
 
-
+'''
+*** goes in actual tourna simulator 
+simulates running of group stage which includes:
+    - playing fixtures
+    - determining which teams progress to next stage
+        - top 2 teams of each group
+        - if teams no. 2 & 3 have the same points & gd -> play winning playoff fixture -> randomizer may come out as a draw, need a win
+'''
+class GroupStage:
+    def __init__(self, groups:{Group} = None) -> None:
+        self.groups = groups
+    
+    def add_groups(self, G:Group):
+        self.groups.append(G)
 
 if __name__ == '__main__':
     main()

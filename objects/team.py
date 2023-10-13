@@ -1,5 +1,5 @@
 class Team:
-    def __init__(self, name: str, games_played: int = 0, goals_for: int = 0, goals_against: int = 0, games_won: int = 0, games_lost: int = 0, games_drawn: int = 0):
+    def __init__(self, name: str, games_played: int = 0, games_won: int = 0, games_drawn: int = 0, games_lost: int = 0, goals_for: int = 0, goals_against: int = 0):
         self.name = name
         self.games_played = games_played
         self.goals_for = goals_for
