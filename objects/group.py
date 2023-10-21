@@ -5,22 +5,34 @@ from objects.fixture import Fixture
 # creates group fixture list
 # sorts group standings
 class Group:
-    def __init__(self, teams:list = [], fixtures:list = []) -> None:
-        self.team_list = teams
-        self.fixture_list = fixtures
+    def __init__(self, name: str, teams=None, fixtures=None):
+        self.name = name
+        self.team_list = teams if teams is not None else []
+        self.fixture_list = fixtures if fixtures is not None else []
+        
+        if not isinstance(name, str):
+            raise TypeError("Group name must be of type string")
         
         # when params are provided
-        if len(teams) != 0:
+        if teams is not None and len(teams) != 0:
             if any([not isinstance(x, Team) for x in teams]):
                 raise TypeError("Invalid team in provided team list")
             if len(teams) != 4:
                 raise Exception("Error: Each group must consist of 4 teams")
         
-        if len(fixtures) != 0:
+        if fixtures is not None and len(fixtures) != 0:
             if any([not isinstance(x, Fixture) for x in fixtures]):
                 raise TypeError("Invalid fixture in provided fixture list")
             if len(fixtures) != 6:
                 raise Exception("Error: Each team must play against every other team in the group")
+    
+    def add_team(self, T:Team):
+        if not isinstance(T, Team):
+            raise TypeError("Invalid team in provided team list")
+        if len(self.team_list) >= 4:
+            raise IndexError("Group consists of a maximum of 4 teams")
+        
+        self.team_list.append(T)
     
     def create_fixtures(self):        
         for i in range(0, len(self.team_list)-1):
