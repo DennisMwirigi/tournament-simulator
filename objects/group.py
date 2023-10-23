@@ -45,21 +45,35 @@ class Group:
                 j += 1
 
     # insertion sort by points, if equal points sort by goal difference
-    def sort(self):
-        n = len(self.team_list) # is always going to be 4
-        
-        for i in range(1, n):
-            key = self.team_list[i]
-            j = i-1
+    def sort(self):        
+        for i in range(1, len(self.team_list)):
+            j = i
             
-            while j>=0 and key.total_points() > self.team_list[j].total_points():
-                if key.total_points() == self.team_list[j].total_points(): # check for GD
-                    if key.goal_difference() > self.team_list[j].goal_difference():
-                        self.team_list[j+1] = self.team_list[j]
- 
-                if key.total_points() > self.team_list[j].total_points():
-                    self.team_list[j+1] = self.team_list[j]
+            while j > 0:
+                if self.team_list[j-1].total_points() < self.team_list[j].total_points():
+                    next = self.team_list[j-1]
+                    self.team_list[j-1] = self.team_list[j]
+                    self.team_list[j] = next
+                    
+                if self.team_list[j-1].total_points() == self.team_list[j].total_points(): # check for GD
+                    if self.team_list[j-1].goal_difference() < self.team_list[j].goal_difference():
+                        next = self.team_list[j-1]
+                        self.team_list[j-1] = self.team_list[j]
+                        self.team_list[j] = next
                 
                 j -= 1
-                
-            self.team_list[j+1] = key
+    
+    # determine top 2 teams to progress out of the group stage
+    # return winner and runner-up in dict
+    def det_prog_teams(self) -> dict:
+        outcome = {"Winner": self.team_list[0], "Runner-up": self.team_list[1]}
+        
+        # if teams no. 2 & 3 have the same points & gd -> play winning playoff fixture
+        if self.team_list[1].total_points() == self.team_list[2].total_points() and self.team_list[1].goal_difference() == self.team_list[2].goal_difference():
+            playoff = Fixture(team1=self.team_list[1], team2=self.team_list[2])
+            result = playoff.play_final()
+            
+            if result[1] > result[0]:
+                outcome["Runner-up"] = self.team_list[2]
+        
+        return outcome

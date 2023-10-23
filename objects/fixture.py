@@ -76,7 +76,7 @@ class Fixture:
         
         self.agg_score = (t1_total, t2_total)
     
-    def play_final(self) -> None:
+    def play_final(self) -> list:
         # randomize score from 0-10 with weights for each result
         score_list = [0] * 20 + [1] * 20 + [2] * 20 + [3] * 20 + [4] * 20 + [5] * 3 + [6] * 3 + [7] * 1 + [8] * 1 + [9] * 1 + [10] * 1
         
@@ -84,11 +84,6 @@ class Fixture:
         # cannot end in a draw
         while scores[0] == scores[1]:
             scores = random.choices(population=score_list, k=2)
-        
-        team1_score = scores[0]
-        team2_score = scores[1]
-        
-        # fixture outcome relative to home team
-        self.result = str(team1_score) + "-" + str(team2_score)
 
-        return self.result
+        # team1 score = scores[0], team2 score = scores[1]
+        return scores

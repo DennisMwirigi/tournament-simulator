@@ -2,9 +2,10 @@ import random
 from objects.team import Team
 from objects.fixture import Fixture
 from objects.group import Group
+from objects.ko_stage import RO16, QfStage, SfStage
 
 def main():
-    # start off by listing the 32 teams to participate, for now store as pre set enums
+    # start off by listing the 32 teams to participate, for now store as pre set dictionary
     Teams = {
         "United": Team("United"),
         "Chelsea": Team("Chelsea"),
@@ -60,6 +61,7 @@ def main():
             t = teams[index]
             teams.pop(index)
             group.add_team(t)
+            t.group = group.name # set team's group attribute
     
     # simulate group stage
     for group in Groups.values():
@@ -73,39 +75,101 @@ def main():
                 fixture.play_fixture()
             leg += 1
     
+    # display table -> make func, add formatting
     for group in Groups.values():
         group.sort()
         
-        # display table -> make func, add formatting
         print(group.name)
         
         for team in group.team_list:
             print(team.name, team.games_played, team.games_won, team.games_drawn, team.games_lost, team.goals_for, team.goals_against, team.goal_difference(), team.total_points())               
         print()
     
-    # choose teams to progress to ko stage
-    # if Groups["A"].team_list[1].total_points() == Groups["A"].team_list[2].total_points() and Groups["A"].team_list[1].goal_difference() == Groups["A"].team_list[2].goal_difference():
-    # play playoff fixture, winner progresses
-    playoff = Fixture(team1=Groups["A"].team_list[1], team2=Groups["A"].team_list[2])
+    # choose teams to progress to ko stage 
+    gs_winners = [group.det_prog_teams()["Winner"] for group in Groups.values()] 
+    gs_runner_ups = [group.det_prog_teams()["Runner-up"] for group in Groups.values()]
+      
+    print("Progressing teams:")
+    print("Winners:", [x.name for x in gs_winners])
+    print("Runner-ups:", [x.name for x in gs_runner_ups])
+    print()
     
-    # cannot be a draw
+    ro16_stage = RO16(prev_winners=gs_winners, runner_ups=gs_runner_ups)
+    ro16_stage.create_fixtures()
     
-    print(playoff.play_final())
-        
-# '''
-# *** goes in actual tourna simulator 
-# simulates running of group stage which includes:
-#     - playing fixtures
-#     - determining which teams progress to next stage
-#         - top 2 teams of each group
-#         - if teams no. 2 & 3 have the same points & gd -> play winning playoff fixture -> randomizer may come out as a draw, need a win
-# '''
-# class GroupStage:
-#     def __init__(self, groups:{Group} = None) -> None:
-#         self.groups = groups
+    print("Round of 16 fixtures:")
+    print([(x.team1.name, x.team2.name) for x in ro16_stage.fixture_list])
+    print()
     
-#     def add_groups(self, G:Group):
-#         self.groups.append(G)
+    ro16_stage.play_fixtures()
+    
+    print("Round of 16 winners:")
+    print([x.name for x in ro16_stage.progressing_teams])
+    print()
+    
+    qf_stage = QfStage(prev_winners=ro16_stage.progressing_teams)
+    qf_stage.create_fixtures()
+    
+    print("Quater-final fixtures:")
+    print([(x.team1.name, x.team2.name) for x in qf_stage.fixture_list])
+    print()
+    
+    qf_stage.play_fixtures()
+    
+    print("Quater-final winners:")
+    print([x.name for x in qf_stage.progressing_teams])
+    print()
+    
+    sf_stage = SfStage(prev_winners=qf_stage.progressing_teams)
+    sf_stage.create_fixtures()
+    
+    print("Semi-final fixtures:")
+    print([(x.team1.name, x.team2.name) for x in sf_stage.fixture_list])
+    print()
+    
+    sf_stage.play_fixtures()
+    
+    print("Semi-final winners:")
+    print([x.name for x in sf_stage.progressing_teams])
+    print()
+    
+    print("Semi-final losers:")
+    print([x.name for x in sf_stage.losers()])
+    print()
+    
+    # play 3rd place playoff
+    third_place_playoff = Fixture(team1=sf_stage.losers()[0], team2=sf_stage.losers()[1])
+    
+    print("Third-place playoff fixture:")
+    print((third_place_playoff.team1.name, third_place_playoff.team2.name))
+    print()
+    
+    result = third_place_playoff.play_final()
+    
+    third_place_team = third_place_playoff.team1 if result[0] > result[1] else third_place_playoff.team2
+    
+    # play final game
+    final_game = Fixture(team1=sf_stage.progressing_teams[0], team2=sf_stage.progressing_teams[1])
+    
+    print("Final fixture:")
+    print((final_game.team1.name, final_game.team2.name))
+    print("\n\n")
+    
+    final_result = final_game.play_final()
+    
+    winner = final_game.team1 if final_result[0] > final_result[1] else final_game.team2
+    runner_up = final_game.team1 if final_result[0] < final_result[1] else final_game.team2
+    
+    print("3rd placed team is:\t", third_place_team.name, "! ! ! !")
+    print()
+    
+    print("2nd place team is:\t", runner_up.name, "! ! ! ! !")
+    print("\n\n")
+    
+    print("\t\t\tAND THE TOURNAMENT WINNER IS")
+    print("\n")
+    print("\t\t\t! ! ! ! ", winner.name.upper(), "! ! ! ! !")
+
 
 if __name__ == '__main__':
     main()
