@@ -75,14 +75,20 @@ def main():
                 fixture.play_fixture()
             leg += 1
     
-    # display table -> make func, add formatting
+    # display table
     for group in Groups.values():
         group.sort()
         
-        print(group.name)
+        print("Group " + group.name)
+        print("----------------------------------------------------------------")
+        print(f"Club\t\t   {'MP':<5} {'W':<5} {'D':<5} {'L':<5} {'GF':<5} {'GA':<5} {'GD':<5} Pts")
+        print("----------------------------------------------------------------")
         
+        pos = 1
         for team in group.team_list:
-            print(team.name, team.games_played, team.games_won, team.games_drawn, team.games_lost, team.goals_for, team.goals_against, team.goal_difference(), team.total_points())               
+            print(f"{pos}. {team.name:<15} {team.games_played:<5} {team.games_won:<5} {team.games_drawn:<5} {team.games_lost:<5} {team.goals_for:<5} {team.goals_against:<5} {team.goal_difference():<5} {team.total_points()}")
+            pos+=1
+        print("----------------------------------------------------------------")       
         print()
     
     # choose teams to progress to ko stage 
@@ -97,6 +103,10 @@ def main():
     ro16_stage = RO16(prev_winners=gs_winners, runner_ups=gs_runner_ups)
     ro16_stage.create_fixtures()
     
+    print()
+    print("----------------------------------------------------------------")
+    print("\t\t\tROUND OF 16")
+    print("----------------------------------------------------------------")
     print("Round of 16 fixtures:")
     print([(x.team1.name, x.team2.name) for x in ro16_stage.fixture_list])
     print()
@@ -104,12 +114,15 @@ def main():
     ro16_stage.play_fixtures()
     
     print("Round of 16 winners:")
-    print([x.name for x in ro16_stage.progressing_teams])
-    print()
+    print([x.name for x in ro16_stage.progressing_teams], end="")
     
     qf_stage = QfStage(prev_winners=ro16_stage.progressing_teams)
     qf_stage.create_fixtures()
     
+    print()
+    print("----------------------------------------------------------------")
+    print("\t\t\tQUATER FINALS")
+    print("----------------------------------------------------------------")
     print("Quater-final fixtures:")
     print([(x.team1.name, x.team2.name) for x in qf_stage.fixture_list])
     print()
@@ -117,32 +130,31 @@ def main():
     qf_stage.play_fixtures()
     
     print("Quater-final winners:")
-    print([x.name for x in qf_stage.progressing_teams])
-    print()
+    print([x.name for x in qf_stage.progressing_teams], end="")
     
     sf_stage = SfStage(prev_winners=qf_stage.progressing_teams)
     sf_stage.create_fixtures()
     
+    print()
+    print("----------------------------------------------------------------")
+    print("\t\t\tSEMI FINALS")
+    print("----------------------------------------------------------------")
     print("Semi-final fixtures:")
     print([(x.team1.name, x.team2.name) for x in sf_stage.fixture_list])
     print()
     
     sf_stage.play_fixtures()
     
-    print("Semi-final winners:")
-    print([x.name for x in sf_stage.progressing_teams])
-    print()
-    
     print("Semi-final losers:")
     print([x.name for x in sf_stage.losers()])
     print()
     
+    print("Semi-final winners:")
+    print([x.name for x in sf_stage.progressing_teams])
+    print()
+    
     # play 3rd place playoff
     third_place_playoff = Fixture(team1=sf_stage.losers()[0], team2=sf_stage.losers()[1])
-    
-    print("Third-place playoff fixture:")
-    print((third_place_playoff.team1.name, third_place_playoff.team2.name))
-    print()
     
     result = third_place_playoff.play_final()
     
@@ -151,14 +163,15 @@ def main():
     # play final game
     final_game = Fixture(team1=sf_stage.progressing_teams[0], team2=sf_stage.progressing_teams[1])
     
-    print("Final fixture:")
-    print((final_game.team1.name, final_game.team2.name))
-    print("\n\n")
-    
     final_result = final_game.play_final()
     
     winner = final_game.team1 if final_result[0] > final_result[1] else final_game.team2
     runner_up = final_game.team1 if final_result[0] < final_result[1] else final_game.team2
+    
+    print()
+    print("----------------------------------------------------------------")
+    print("\t\t  TOURNAMENT STANDINGS")
+    print("----------------------------------------------------------------")
     
     print("3rd placed team is:\t", third_place_team.name, "! ! ! !")
     print()
@@ -166,9 +179,9 @@ def main():
     print("2nd place team is:\t", runner_up.name, "! ! ! ! !")
     print("\n\n")
     
-    print("\t\t\tAND THE TOURNAMENT WINNER IS")
+    print("\t     AND THE TOURNAMENT WINNER IS")
     print("\n")
-    print("\t\t\t! ! ! ! ", winner.name.upper(), "! ! ! ! !")
+    print("\t     ! ! ! ! ", winner.name.upper(), "! ! ! ! !")
 
 
 if __name__ == '__main__':
