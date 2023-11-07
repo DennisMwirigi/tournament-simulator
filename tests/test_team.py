@@ -5,13 +5,14 @@ def test_init_with_name():
     team = Team("united")
     assert team.name == "united"
     assert team.games_played == 0
+    assert team.games_won == 0
+    assert team.games_drawn == 0
+    assert team.games_lost == 0
     assert team.goals_for == 0
     assert team.goals_against == 0
     assert team.goal_difference() == 0
-    assert team.games_won == 0
-    assert team.games_lost == 0
-    assert team.games_drawn == 0
     assert team.total_points() == 0
+    assert team.group == None
 
 def test_init_no_name():
     with pytest.raises(Exception):
@@ -87,7 +88,16 @@ def test_init_valid_params():
     assert team.goals_against == 6
     assert team.goal_difference() == -1
     assert team.total_points() == 4
+    assert team.group == None
 
+def test_equality():
+    team1 = Team("united")
+    team2 = Team("united")
+    team3 = Team("chelsea")
+    
+    assert team1 == team2
+    assert team2 != team3
+    
 def test_won_game():
     team = Team("united")
     team.won_game()

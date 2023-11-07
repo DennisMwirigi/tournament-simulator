@@ -5,10 +5,9 @@ class Fixture:
     def __init__(self, team1: Team, team2: Team, leg: int = 1, agg_score = None, scores = None) -> None:
         self.team1 = team1
         self.team2 = team2
-        self.leg = leg # implement as a counter
+        self.leg = leg
         self.agg_score = agg_score if agg_score is not None else ()
-        # store leg scores in array
-        self.scores = scores if scores is not None else []  # store scores as tuples, sum later for agg_score
+        self.scores = scores if scores is not None else []
         self.result = None
         
         if not isinstance(team1, Team) and not isinstance(team2, Team):
@@ -21,6 +20,14 @@ class Fixture:
             raise TypeError("scores attribute must be of type list")
         if leg < 1:
             raise Exception("Cannot have a fixture with less than one leg")
+        if team1 == team2:
+            raise ValueError("Team cannot play against itself")
+    
+    # Fixtures are considered equal if they both have the same home team (team1) and same away team (team2)
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.team1 == other.team1 and self.team2 == other.team2
+        return False
     
     def play_fixture(self) -> str:        
         if self.leg > 2 or len(self.scores) >= 2:
